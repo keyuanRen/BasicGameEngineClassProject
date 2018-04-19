@@ -1,6 +1,4 @@
-﻿  main.cpp
-c:\users\pc\source\repos\setup\setup\main.cpp(109): warning C4305: 'argument': truncation from 'double' to 'float'
-c:\users\pc\source\repos\setup\setup\main.cpp(110): warning C4305: 'argument': truncation from 'double' to 'float'
-c:\users\pc\source\repos\setup\setup\main.cpp(111): warning C4305: 'argument': truncation from 'double' to 'float'
-c:\users\pc\source\repos\setup\setup\main.cpp(131): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+﻿  Hero.cpp
+c:\users\pc\source\repos\setup\setup\hero.cpp(41): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+c:\users\pc\source\repos\setup\setup\hero.cpp(43): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
   Setup.vcxproj -> C:\Users\PC\source\repos\Setup\Debug\Setup.exe
