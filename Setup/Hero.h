@@ -8,6 +8,7 @@ class Hero :
 private:
 	Animation * animation = NULL;
 	bool faceRight = true;
+	//bool faceUp = true;
 public:
 	Hero();
 	~Hero();

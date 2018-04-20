@@ -118,11 +118,17 @@ int main(int arc, char **argv)
 	Hero* hero = new Hero();
 	hero->setAnimation(&anim3);
 	hero->setRenderer(renderer);
-	hero->setXY(30, 200);
+	//hero->setXY(30, 200);
+
+	//
+	Vector heroStartPos(200, 200);
+	hero->setPosition(heroStartPos);
+
 	//add our hero to the list
 	entities.push_back(hero);
 
 	bool loop = true;
+
 	while (loop)
 	{
 		//different is current time running the last update time
@@ -166,6 +172,44 @@ int main(int arc, char **argv)
 		anim2.draw(50, 100, 4.0f);//4.0f is scale, stretch by 4x
 		anim3.draw(400,400,true);//flip image horizontallly */
 
+		//DEAL with user input
+		//we check what kind of user input events have happened since our last check
+		SDL_Event e;
+		//loop through all events and temporarily stores event details in an SDL_Event object
+		while (SDL_PollEvent(&e))
+		{
+			//check if user has clicked on the close window button
+			if (e.type == SDL_QUIT)
+			{
+				//exit our loop
+				loop = false;
+			}
+			//check if user has 'pressed' a button(not held)
+			if (e.type == SDL_KEYDOWN)
+			{
+				//see if ESC key was pressed
+				if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+				{
+					//exit loop
+					loop = false;
+				}
+				//if press up
+				if (e.key.keysym.scancode == SDL_SCANCODE_UP)
+				{
+					Vector heroVelocity = hero->getVelocity();
+					heroVelocity.y = -100;
+					hero->setVelocity(heroVelocity);
+				}
+				//if press down
+				if (e.key.keysym.scancode == SDL_SCANCODE_DOWN)
+				{
+					Vector heroVelocity = hero->getVelocity();
+					heroVelocity.y = 100;
+					hero->setVelocity(heroVelocity);
+				}
+			}
+		}
+
 		//loop through and update draw all entities
 		for (list<Entity*>::iterator eIt = entities.begin(); eIt != entities.end(); eIt++)
 		{
@@ -177,10 +221,10 @@ int main(int arc, char **argv)
 		SDL_RenderPresent(renderer);
 
 		//sdl_ticks checks how many milliseconds since we started running our game
-		if (SDL_GetTicks() > 15000)
+		/*if (SDL_GetTicks() > 15000)
 		{
 			loop = false;
-		}
+		}*/
 
 	}
 	//SDL_Delay pauses game for x many milliseconds
