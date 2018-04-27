@@ -7,12 +7,14 @@ class Entity
 {
 protected:
 	SDL_Renderer * renderer;
-	Vector pos;//our entities x y position
-	Vector velocity; //how fast to move in my direction
+	
 
 public:
 	Entity();
 	~Entity();
+
+	Vector pos;//our entities x y position
+	Vector velocity; //how fast to move in my direction
 
 	void setRenderer(SDL_Renderer* renderer);
 	

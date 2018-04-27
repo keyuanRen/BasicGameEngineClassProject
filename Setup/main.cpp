@@ -1,11 +1,16 @@
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <iostream>
 #include <string>
 #include "Animation.h"
 #include "Entity.h"
 #include "Hero.h"
 #include <list>
+#include "InputHandler.h"
+#include "KeyboardHandler.h"
+#include "MouseHandler.h"
+#include "GameControllerHandler.h"
 
 using namespace std;
 
@@ -66,6 +71,20 @@ int main(int arc, char **argv)
 		return -1;
 	}
 
+	//Init sdl_ttf
+	if (TTF_Init() != 0)
+	{
+		//if failed, complain about it
+		cout << "SDL TTF FAILED!!" << endl;
+		system("pause");
+		SDL_Quit();
+		return -1;
+	}
+
+	//Get controller mappings
+	SDL_GameControllerAddMappingsFromFile("assets/gamecontrollerdb.txt");
+
+
 	//Load up whatever assets here after init
 
 	//to load up an image, first load it up as a surface
@@ -120,12 +139,40 @@ int main(int arc, char **argv)
 	hero->setRenderer(renderer);
 	//hero->setXY(30, 200);
 
-	//
+	//build vector to represent starting position for hero
 	Vector heroStartPos(200, 200);
 	hero->setPosition(heroStartPos);
 
+	//create input handler
+	KeyboardHandler keyboardHandler;
+	keyboardHandler.hero = hero; // let it reference our hero
+
+	MouseHandler mouseHandler;
+	mouseHandler.hero = hero;
+
+	GameControllerHandler gameControllerHandler;
+	gameControllerHandler.hero = hero;
+
 	//add our hero to the list
 	entities.push_back(hero);
+
+	//Load up our font
+	TTF_Font* font = TTF_OpenFont("assets/vermin_vibes_1989.ttf", 16); // params: font file, font size
+
+	//create a surface using this font to display some sort of message
+	SDL_Color textColor = {123,0,34,255};
+	SDL_Surface* textSurface = TTF_RenderText_Blended(font, "Hello Game!", textColor);
+	//convert surface to texture
+	SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+	//delete surface properly
+	SDL_FreeSurface(textSurface);
+
+	//text destination
+	SDL_Rect textDestination;
+	textDestination.x = 50;
+	textDestination.y = 50;
+	//get width and height from texture and set it for the destination
+	SDL_QueryTexture(textTexture, NULL, NULL, &textDestination.w, &textDestination.h);
 
 	bool loop = true;
 
@@ -193,21 +240,31 @@ int main(int arc, char **argv)
 					//exit loop
 					loop = false;
 				}
-				//if press up
-				if (e.key.keysym.scancode == SDL_SCANCODE_UP)
-				{
-					Vector heroVelocity = hero->getVelocity();
-					heroVelocity.y = -100;
-					hero->setVelocity(heroVelocity);
-				}
-				//if press down
-				if (e.key.keysym.scancode == SDL_SCANCODE_DOWN)
-				{
-					Vector heroVelocity = hero->getVelocity();
-					heroVelocity.y = 100;
-					hero->setVelocity(heroVelocity);
-				}
+
+				////if press up
+				//if (e.key.keysym.scancode == SDL_SCANCODE_UP)
+				//{
+				//	Vector heroVelocity = hero->getVelocity();
+				//	heroVelocity.y = -100;
+				//	hero->setVelocity(heroVelocity);
+				//}
+				////if press down
+				//if (e.key.keysym.scancode == SDL_SCANCODE_DOWN)
+				//{
+				//	Vector heroVelocity = hero->getVelocity();
+				//	heroVelocity.y = 100;
+				//	hero->setVelocity(heroVelocity);
+				//}
 			}
+			//use our keyboard handler to take it from here
+			//if gamecontroller connected, use it
+			if (gameControllerHandler.controller != NULL)
+				gameControllerHandler.update(&e);
+			else // else user keyboard
+			    keyboardHandler.update(&e);
+			
+			mouseHandler.update(&e);
+
 		}
 
 		//loop through and update draw all entities
@@ -216,6 +273,12 @@ int main(int arc, char **argv)
 			(*eIt)->update(DT);
 			(*eIt)->draw();
 		}
+
+		//Draw text onTop of everything else
+		//params: renderer(drawing object), texture to render, srcRectangle(null means use full textture , using an sdl_rect will choose a clip of texture)
+		//destination sdl_rect(where to draw, if null, fill entire window)
+		SDL_RenderCopy(renderer, textTexture, NULL, &textDestination);
+
 
 		//Then   Get Renderer to output to the window
 		SDL_RenderPresent(renderer);
@@ -232,6 +295,13 @@ int main(int arc, char **argv)
 
 	//clean up any game objects
 	delete hero;
+
+	TTF_CloseFont(font);
+	//clean uo textures
+	SDL_DestroyTexture(textTexture);
+	SDL_DestroyTexture(runSpriteSheet);
+	SDL_DestroyTexture(runSpriteSheetWithNoBG);
+	SDL_DestroyTexture(knightTexture);
 
 	//cleanup renderer and window properly (aka clean up dynamic memory)
 	SDL_DestroyRenderer(renderer);
